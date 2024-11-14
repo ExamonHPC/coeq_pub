@@ -1,0 +1,12 @@
+[Unit]
+Description=co2eq Service
+
+[Service]
+Type=simple
+User=examon
+ExecStart=/home/examon/examon/publishers/co2_eq/co2_publisher.py
+Restart=on-abort
+WorkingDirectory=/home/examon/examon/publishers/co2_eq/
+
+[Install]
+WantedBy=multi-user.target

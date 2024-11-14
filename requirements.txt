@@ -1,0 +1,4 @@
+entsoe-py
+np
+pandas
+paho-mqtt
