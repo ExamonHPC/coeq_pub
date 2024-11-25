@@ -3,6 +3,16 @@ import paho.mqtt.client as mqtt
 import time
 import socket
 from coe_calculator import get_COE
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 hostname = socket.gethostname()
 BROKER = '127.0.0.1'
@@ -15,17 +25,22 @@ def get_value():
 def publish_message(client,value):
     current_timestamp = time.time()
     client.publish(TOPIC,f"{value};{current_timestamp}")
-    print(f"Published {value};{current_timestamp} to topic {TOPIC}")
+    logging.info(f"Published {value};{current_timestamp} to topic {TOPIC}")
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.connect(BROKER, PORT)
 
 try:
     while True:
+            
         value = get_value()
-        for _ in range(2):
+        for _ in range(30):
+            if not client.is_connected():
+                logging.error("MQTT client was disconnected, try to reconnect")
+                client.connect(BROKER, PORT)
+            else:
+                logging.info(f"Still connected")
             publish_message(client,value)
-            time.sleep(1800)  
+            time.sleep(120)  
 except KeyboardInterrupt:
     print("Script stopped by user.")
 finally:

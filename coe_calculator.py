@@ -115,16 +115,14 @@ def get_COE():
     # Estrazione di Data e Ora
     if isinstance(cleaned_df.columns, pd.MultiIndex):
         print("MultiIndex")
-        cleaned_df.columns = [' - '.join(col).strip() for col in cleaned_df.columns]
-    print(cleaned_df.columns)
+        cleaned_df.columns = [' - '.join(col).strip() if col[0] != 'MTU' else col[0] for col in cleaned_df.columns  ]
+
     if  "- Actual Aggregated" not in cleaned_df.columns[0]:
         print("Missing Actual")
         standardized_columns = {
             col: f"{col} - Actual Aggregated" for col in cleaned_df.columns if col not in ['Date', 'Time', 'MTU'] }
         cleaned_df.rename(columns=standardized_columns, inplace=True)
     cleaned_df.rename(columns=column_name_mapping, inplace=True)
-
-    print(cleaned_df.columns)
 
     cleaned_df['Date'] = cleaned_df['MTU'].str.split(' - ').str[0].str.split(' ').str[0]
     cleaned_df['Time'] = cleaned_df['MTU'].str.split(' - ').str[0].str.split(' ').str[1]
@@ -137,7 +135,6 @@ def get_COE():
 
     # Calcolo della kWh totale e dell'intensità carbonica
     energy_sources = [col for col in cleaned_df.columns if col not in ['Date', 'Time', 'MTU']]
-    print(energy_sources,cleaned_df.columns)
     cleaned_df['Total_kWh'] = cleaned_df[energy_sources].sum(axis=1)
     cleaned_df['Carbon_Intensity'] = cleaned_df[energy_sources].apply(lambda row: sum(row[source] * energy_values[source] for source in energy_sources) / cleaned_df['Total_kWh'], axis=1)
 
