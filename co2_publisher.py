@@ -35,10 +35,7 @@ try:
         value = get_value()
         for _ in range(30):
             if not client.is_connected():
-                logging.error("MQTT client was disconnected, try to reconnect")
                 client.connect(BROKER, PORT)
-            else:
-                logging.info(f"Still connected")
             publish_message(client,value)
             time.sleep(120)  
 except KeyboardInterrupt:
