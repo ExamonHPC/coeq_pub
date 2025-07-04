@@ -1,10 +1,13 @@
 #!/home/examon/.venv/bin/python
+
 import paho.mqtt.client as mqtt
 import time
 import socket
 from coe_calculator import get_COE
 import logging
 import sys
+import configparser
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,10 +17,16 @@ logging.basicConfig(
     ]
 )
 
+# Load configuration from co2_pub.conf
+config = configparser.ConfigParser()
+config.read('co2_pub.conf')
+
+
 hostname = socket.gethostname()
-BROKER = '127.0.0.1'
-PORT = 1883
-TOPIC = f'org/unibo/cluster/hifive/node/{hostname}/plugin/coe_calulator/chnl/data/carbon_intensity'
+BROKER = config.get('MQTT', 'BROKER', fallback='127.0.0.1')
+PORT = config.getint('MQTT', 'PORT', fallback=1883)
+TOPIC_TEMPLATE = config.get('MQTT', 'TOPIC_TEMPLATE', fallback='org/unibo/cluster/hifive/node/{hostname}/plugin/coe_calulator/chnl/data/carbon_intensity')
+TOPIC = TOPIC_TEMPLATE.format(hostname=hostname)
 
 def get_value():
     value = "{:.2f}".format(get_COE())
